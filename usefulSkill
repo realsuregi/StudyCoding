@@ -1,0 +1,101 @@
+/////////////////////////////////////////////////////////////////////////////////////////////
+//unordered_map<string, Data*>
+
+//#include <unordered_map>
+//#include <string>
+//
+//struct Data {
+//	int num;
+//	int data;
+//
+//	void getData(int n) {
+//		this->data = n;
+//	}
+//};
+////map의 value로 단순한 값을 받기 보다 포인터 형식으로 하는 것이 훨씬 효과적
+////struct로 데이터 형태를 잡아준다면 효율적으로 사용할 수도 있다.
+//std::unordered_map<std::string, Data*> dataDB;
+//
+//void init() {
+//	dataDB.clear();
+//}
+//
+////
+//void func1(char mName[]) {
+//	Data *p = dataDB[mName]; // O(1);
+//	if (p == nullptr) {
+//		p->getData(1);
+//		dataDB[mName] = p;
+//	}
+//
+//}
+ 
+/////////////////////////////////////////////////////////////////////////////////////////////
+//unordered_multimap
+//#include <unordered_map>
+//
+//struct Data {
+//	int data;
+//};
+//
+//std::unordered_multimap<int, Data*> dataDB;
+//
+//void init() {
+//	dataDB.clear();
+//}
+//
+//void func1(int v) {
+//	Data* p1;
+//	dataDB.insert({ v, p1 });
+//	auto r = dataDB.equal_range(v); // O(1);
+//
+//	for (auto v = r.first; v != r.second; v++) {
+//		Data* p = v->second;
+//	}
+//}
+//
+/////////////////////////////////////////////////////////////////////////////
+////hash Function
+//#define HASHMOD 0x8000 // be 2^n if possible
+//
+//int calcHashValue(char s[]) {
+//	int ret = 0;
+//	for (int idx = 0; s[idx] != '\0'; ++idx) {
+//		ret = (ret * 7 + s[idx]) % HASHMOD;
+//	}
+//	return ret;
+//}
+//
+//int calcHashValue(int v) {
+//	return v % HASHMOD;
+//}
+
+////////////////////////////////////////////////////////////////////////////////
+//PQ example
+#include <queue>
+#include <vector>
+
+struct Data {
+	int data;
+};
+
+struct comp{
+	bool operator()(Data* a, Data* b) {
+		return a->data > b->data;
+	}
+};
+
+std::priority_queue<Data*, std::vector<Data*>, comp> PQ;
+
+void init() {
+	PQ = {};
+}
+
+void func1() {
+	while (!PQ.empty()) {
+		Data* p = PQ.top();
+		PQ.pop();
+		PQ.push(p);
+	}
+}
+
