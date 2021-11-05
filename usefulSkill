@@ -29,7 +29,7 @@
 //	}
 //
 //}
- 
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 //unordered_multimap
 //#include <unordered_map>
@@ -71,31 +71,167 @@
 //}
 
 ////////////////////////////////////////////////////////////////////////////////
-//PQ example
-#include <queue>
-#include <vector>
+////PQ example
+//#include <queue>
+//#include <vector>
+//
+//struct Data {
+//	int data;
+//};
+//
+//struct comp {
+//	bool operator()(Data* a, Data* b) {
+//		return a->data > b->data;
+//	}
+//};
+//
+//std::priority_queue<Data*, std::vector<Data*>, comp> PQ;
+//
+//void init() {
+//	PQ = {};
+//}
+//
+//void func1() {
+//	while (!PQ.empty()) {
+//		Data* p = PQ.top();
+//		PQ.pop();
+//		PQ.push(p);
+//	}
+//}
 
-struct Data {
-	int data;
-};
+//////////////////////////////////////////////////////////////////////////////
+//Modification in PQ
+//#include <queue>
+//
+//struct Data {
+//	int pri;
+//	int checked;
+//};
+//std::priority_queue<std::pair<int, Data*>> PQ;
+//
+//Data* db[123456789];
+//void modify(int mID, int c) {
+//	Data* p = db[mID];
+//	p->pri += c;
+//	PQ.push({ p->pri, p });
+//}
+//
+//int checkCnt = 0;
+//void find() {
+//	++checkCnt;
+//	while (!PQ.empty()) {
+//		int pri = PQ.top().first;
+//		Data* p = PQ.top().second;
+//		PQ.pop();
+//		if (pri != p->pri && p->checked == checkCnt)
+//			continue;
+//		p->checked = checkCnt;
+//	}
+//}
 
-struct comp{
-	bool operator()(Data* a, Data* b) {
-		return a->data > b->data;
+////////////////////////////////////////
+////set Example set<Data*, comp>
+//#include <set>
+//
+//struct Data {
+//	int pri;
+//	int data;
+//};
+//
+//struct comp {
+//	bool operator()(Data* const &a, Data* const &b) {
+//		return a->pri > b->pri;
+//	}
+//};
+//
+//std::set<Data*, comp> SET;
+//
+//void init() {
+//	SET.clear();
+//}
+//
+//void func1() {
+//	for (auto it = SET.begin(); it != SET.end();) {
+//		Data* p = *it;
+//		SET.erase(it++);
+//	}
+//}
+
+///////////////////////////////////////////////////////
+//Modification in SET
+
+//#include <set>
+//struct Data {
+//	int pri;
+//	int data;
+//};
+//
+//struct comp {
+//	bool operator()(Data* const &a, Data* const &b) {
+//		return a->pri > b->pri;
+//	}
+//};
+//
+//std::set<Data*, comp> SET;
+//Data* iteratordb[123456789];
+//Data* db[123456789];
+//void modify(int mID, int c) {
+//	auto it = iteratordb[mID];
+//	Data* p = db[mID];
+//	p += c;
+//	SET.erase(it);
+//	auto r = SET.insert(p);
+//	iteratordb[mID] = *r.first;
+//}
+//
+//void find() {
+//	while (SET.size() > 0) {
+//		auto it = SET.begin();
+//		SET.erase(it);
+//	}
+//}
+
+///////////////////////////////////////////////
+//Heap POP
+int heap[123456789];
+int data[123456789];
+int heapsize;
+int pop() {
+	int ret = heap[0];
+	heap[0] = heap[--heapsize];
+	int cur = 0;
+	while (cur * 2 + 1 < heapsize)
+	{
+		int child = (cur * 2 + 2 == heapsize) ||
+			(data[heap[cur * 2 + 2]] < data[heap[cur * 2 + 1]]) ?
+			cur * 2 + 1 : cur * 2 + 2;
+		if (data[heap[child]] < data[heap[cur]]) break;
+		swap(heap[cur], heap[child]);
+		cur = child;
 	}
-};
-
-std::priority_queue<Data*, std::vector<Data*>, comp> PQ;
-
-void init() {
-	PQ = {};
+	return ret;
 }
 
-void func1() {
-	while (!PQ.empty()) {
-		Data* p = PQ.top();
-		PQ.pop();
-		PQ.push(p);
+void shiftup(int uID) {
+	int cur = uID;
+	while (cur > 0 && data[heap[(cur - 1) / 2]] < data[heap[cur]]) {
+		swap(heap[cur], heap[(cur - 1) / 2]);
+		data[heap[cur]].uID = cur;
+		data[heap[(cur - 1) / 2]].uID = (cur - 1) / 2;
+		cur = (cur - 1) / 2;
 	}
 }
 
+void shiftdown(int nID) {
+	int cur = nID;
+	while (cur * 2 + 1 < heapsize) {
+		int child = (cur * 2 + 2 == heapsize) ||
+			(data[heap[cur * 2 + 2]] < data[heap[cur * 2 + 1]]) ?
+			cur * 2 + 1 : cur * 2 + 2;
+		if (data[heap[child]] < data[heap[cur]]) break;
+		swap(heap[cur], heap[child]);
+		data[heap[cur]] = cur;
+		data[heap[child]] = child;
+		cur = child;
+	}
+}
