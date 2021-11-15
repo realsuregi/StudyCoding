@@ -1,0 +1,249 @@
+///////////////////////////////////////////////////////////////
+//기본 구조
+
+struct Heap {
+	int n;
+	int v[100000];
+	void init() {
+		n = 1;
+	}
+	void push(int value) {
+		v[n] = value;
+		n++;
+		update(n - 1);
+	}
+	int pop() {
+		n--;
+		int res = v[1];
+		v[1] = v[n];
+		v[n] = res;
+
+		downdate(1);
+
+		return res;
+	}
+	int top() { return v[1]; }
+	void update(int ti) {
+		while (ti > 1) {
+			int ri = ti / 2;
+			if (v[ri] > v[ti]) {
+				int temp = v[ri];
+				v[ri] = v[ti];
+				v[ti] = temp;
+				ti = ri;
+			}
+			else
+				break;
+		}
+	}
+	
+	void downdate(int ti) {
+		while (ti < n) {
+			int pi = ti * 2;
+			int qi = ti * 2 + 1;
+			int ri = pi;
+			if (pi >= n) break;
+			if (qi >= n) ri = pi;
+			else {
+				if (v[ri] > v[qi]) ri = qi;
+			}
+			if (v[ti] > v[ri]) {
+				int temp = v[ri];
+				v[ri] = v[ti];
+				v[ti] = temp;
+				ti = ri;
+			}
+			else break;
+		}
+	}
+};
+
+////////////////////////////////////////////////////////////
+//upgrade version
+
+struct Heap {
+	int n;
+	int v[100000];
+	int v_index[100000];
+	int index[100000];
+	void init() {
+		n = 1;
+	}
+	void push(int value, int i) {
+		v[n] = value;
+		v_index[n] = i;
+
+		index[i] = n;
+		n++;
+		update(n - 1);
+	}
+	int pop() {
+		n--;
+		int res = v[1];
+		v[1] = v[n];
+		v[n] = res;
+
+		downdate(1);
+
+		return res;
+	}
+	int top() { return v[1]; }
+	void update(int ti) {
+		while (ti > 1) {
+			int ri = ti / 2;
+			if (v[ri] > v[ti]) {
+				int temp = v[ri];
+				v[ri] = v[ti];
+				v[ti] = temp;
+
+				temp = v_index[ri];
+				v_index[ri] = v_index[ti];
+				v_index[ti] = temp;
+
+				index[v_index[ti]] = ti;
+				index[v_index[ri]] = ri;
+
+				ti = ri;
+			}
+			else
+				break;
+		}
+	}
+
+	void downdate(int ti) {
+		while (ti < n) {
+			int pi = ti * 2;
+			int qi = ti * 2 + 1;
+			int ri = pi;
+			if (pi >= n) break;
+			if (qi >= n) ri = pi;
+			else {
+				if (v[ri] > v[qi]) ri = qi;
+			}
+			if (v[ti] > v[ri]) {
+				int temp = v[ri];
+				v[ri] = v[ti];
+				v[ti] = temp;
+
+				temp = v_index[ri];
+				v_index[ri] = v_index[ti];
+				v_index[ti] = temp;
+
+				index[v_index[ti]] = ti;
+				index[v_index[ri]] = ri;
+
+				ti = ri;
+			}
+			else break;
+		}
+	}
+
+	void update_direct(int i, int value) {
+		v[index[i]] = value;
+		update(index[i]);
+		downdate(index[i]);
+	}
+};
+
+
+////////////////////////////////////////
+//예제 여행상품 추천
+
+#include <stdio.h>
+#include <algorithm>
+using namespace std;
+typedef pair<int, int> pii;
+
+struct Heap {
+	int n;
+	pii v[100009];
+	int idx[100009];
+	void init() {
+		n = 1;
+	}
+	void push(int value, int i) {
+		v[n] = pii(value, i);
+		idx[i] = n;
+		n++;
+		update(n - 1);
+	}
+	pii pop(int i = -1){
+		int pid = 1;
+		if (i != -1) {
+			pid = idx[i];
+		}
+		n--;
+		pii res = v[pid];
+		v[pid] = v[n];
+		v[n] = res;
+		idx[v[pid].second] = pid;
+		idx[v[n].second] = n;
+
+		update(pid);
+
+		return res;
+	}
+	pii top() { return v[1]; }
+	void update_direct(int i, int vv) {
+		v[idx[i]].first = vv;
+		update(idx[i]);
+	}
+	void update(int ti) {
+		while (ti > 1) {
+			int ri = ti / 2;
+			if (v[ri] > v[ti]) {
+				pii tmp = v[ri];
+				v[ri] = v[ti];
+				v[ti] = tmp;
+
+				idx[v[ti].second] = ti;
+				idx[v[ri].second] = ri;
+				ti = ri;
+			}
+			else break;
+		}
+		while (ti < n) {
+			int pi = ti * 2;
+			int qi = ti * 2 + 1;
+			int ri = pi;
+			if (pi >= n) break;
+			if (qi >= n) ri = pi;
+			else {
+				if (v[ri] > v[qi]) ri = qi;
+			}
+			if (v[ti] > v[ri]) {
+				pii tmp = v[ri];
+				v[ri] = v[ti];
+				v[ti] = tmp;
+
+				idx[v[ti].second] = ti;
+				idx[v[ri].second] = ri;
+				ti = ri;
+			}
+			else break;
+		}
+	}
+};
+Heap hop;
+int n;
+int main(void){
+	int i, j, k;
+	scanf("%d", &n);
+	hop.init();
+	for (int i = 1; i <= n; i++) {
+		scanf("%d", &j);
+		hop.push(j, i);
+	}
+	scanf("%d", &n);
+	while (n--) {
+		int type;
+		scanf("%d", &type);
+		if (type == 2) {
+			printf("%d\n", hop.top().second);
+		}
+		else {
+			scanf("%d %d", &i, &j);
+			hop.update_direct(i, j);
+		}
+	}
+}
